@@ -1164,7 +1164,6 @@ where
 
             // A sequencer's block should never contain blob or deposit transactions from the pool.
             if tx.is_eip4844() || tx.is_deposit() {
-                println!("B");
                 best_txs.mark_invalid(tx.signer(), tx.nonce());
                 continue;
             }
@@ -1226,7 +1225,11 @@ where
             info.receipts.push(self.build_receipt(ctx, None));
 
             // commit changes
+            let tx_state_commit_time = Instant::now();
             evm.db_mut().commit(state);
+            self.metrics
+                .tx_state_commit_duration
+                .record(tx_state_commit_time.elapsed());
 
             // update add to total fees
             let miner_fee = tx

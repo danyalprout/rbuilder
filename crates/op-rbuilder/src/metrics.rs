@@ -52,6 +52,8 @@ pub struct OpRBuilderMetrics {
     pub payload_num_tx_simulated_fail: Histogram,
     /// Duration of tx simulation
     pub tx_simulation_duration: Histogram,
+    /// Duration of tx state commit
+    pub tx_state_commit_duration: Histogram,
     /// Byte size of transactions
     pub tx_byte_size: Histogram,
     /// Number of reverted transactions
