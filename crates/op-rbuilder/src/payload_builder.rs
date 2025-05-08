@@ -1109,9 +1109,8 @@ where
                 }
             };
 
-            // add gas used by the transaction to cumulative gas used, before creating the receipt
-            let gas_used = result.gas_used();
-            info.cumulative_gas_used += gas_used;
+            // track gas and da used before creating the receipt
+            info.transaction_included(sequencer_tx, &result);
 
             let ctx = ReceiptBuilderCtx {
                 tx: sequencer_tx.inner(),
@@ -1223,9 +1222,8 @@ where
                 trace!(target: "payload_builder", ?tx, "reverted transaction");
             }
 
-            // add gas used by the transaction to cumulative gas used, before creating the receipt
-            let gas_used = result.gas_used();
-            info.cumulative_gas_used += gas_used;
+            // track gas and da used before creating the receipt
+            info.transaction_included(tx, &result);
 
             let ctx = ReceiptBuilderCtx {
                 tx: tx.inner(),

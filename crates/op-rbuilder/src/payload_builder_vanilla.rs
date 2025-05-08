@@ -31,7 +31,7 @@ use reth_chain_state::{ExecutedBlock, ExecutedBlockWithTrieUpdates};
 use reth_chainspec::{ChainSpecProvider, EthChainSpec, EthereumHardforks};
 use reth_evm::{
     env::EvmEnv, eth::receipt_builder::ReceiptBuilderCtx, execute::BlockBuilder, ConfigureEvm,
-    Database, Evm, EvmError, InvalidTxError,
+    Database, Evm, EvmError, InvalidTxError, RecoveredTx,
 };
 use reth_execution_types::ExecutionOutcome;
 use reth_node_api::{NodePrimitives, NodeTypes, TxTy};
@@ -1007,9 +1007,8 @@ where
                 }
             };
 
-            // add gas used by the transaction to cumulative gas used, before creating the receipt
-            let gas_used = result.gas_used();
-            info.cumulative_gas_used += gas_used;
+            // track gas and da used before creating the receipt
+            info.transaction_included(sequencer_tx.inner(), &result);
 
             let ctx = ReceiptBuilderCtx {
                 tx: sequencer_tx.inner(),
@@ -1116,10 +1115,9 @@ where
                 continue;
             }
 
-            // add gas used by the transaction to cumulative gas used, before creating the
-            // receipt
+            // track gas and da used before creating the receipt
+            info.transaction_included(tx.inner(), &result);
             let gas_used = result.gas_used();
-            info.cumulative_gas_used += gas_used;
 
             // Push transaction changeset and calculate header bloom filter for receipt.
             let ctx = ReceiptBuilderCtx {
@@ -1188,9 +1186,8 @@ where
                     .transact(&builder_tx)
                     .map_err(|err| PayloadBuilderError::EvmExecutionError(Box::new(err)))?;
 
-                // Add gas used by the transaction to cumulative gas used, before creating the receipt
-                let gas_used = result.gas_used();
-                info.cumulative_gas_used += gas_used;
+                // track gas and da used before creating the receipt
+                info.transaction_included(builder_tx.inner(), &result);
 
                 let ctx = ReceiptBuilderCtx {
                     tx: builder_tx.inner(),
